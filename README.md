@@ -1,2 +1,2 @@
 # ULHAdominica
-Unified Landslide Hazard Assessment Dominica 
+Unified Landslide Hazard Assessment Dominica
