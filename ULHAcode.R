@@ -185,7 +185,6 @@ fit.size <- inla(formula.sizes,
                  control.inla      = list(strategy = "simplified.laplace", int.strategy = "eb"),
                  verbose           = F)
 
-save(fit.size, file = 'FitSize23092021_INLA200629_R20200229.Rdata')
 
 ########################
 ## Presence model fit ##
@@ -197,11 +196,4 @@ fit.pres <- inla(formula.pres,
                  control.compute   = control.compute,
                  control.inla      = list(strategy = "simplified.laplace", int.strategy = "eb"),
                  verbose           = TRUE)
-
-# if complains that locations are too close for profm, run the following lines and rerun the fit
-m = get("inla.models", INLA:::inla.get.inlaEnv())
-m$latent$rw1$min.diff = NULL
-assign("inla.models", m, INLA:::inla.get.inlaEnv())
-
-save(fit.pres, file = 'UnifiedLandslideHazardAssessment/FitPres23092021_INLA200629_R20200229.Rdata') 
 
