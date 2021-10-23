@@ -7,5 +7,5 @@ The article proposes a method to simultaneously address two main concepts in lan
 
 Here is a description of the files available:
 - ULHAcode.R: R code to run the two parts of the hurdle model (Bernoulli for landslide susceptibility and Gaussian for landslide log-size).
-- ULHAlandslides.csv: the original data that is utilised. Additional data for analysis is created in ULHAcode.R.
+- ULHAlandslides.csv: data (responses and covariates) to fit the models. Additional data for analysis is created in ULHAcode.R.
 - ULHAcoords.csv: locations (in degrees) of the SU centroids.
