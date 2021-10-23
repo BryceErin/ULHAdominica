@@ -59,8 +59,8 @@ data.inla <- cbind(coords,
 ## Model Preparation ##
 #######################
 ## Projection matrix A, spde object and mesh
-mesh <- inla.mesh.2d(loc=  data.inla[,c('Lat', 'Lon')], max.edge = c(2, 5), cutoff   = 0.001)
-A    <- inla.spde.make.A(mesh, loc = as.matrix(data.inla[,c('Lat', 'Lon')]))
+mesh <- inla.mesh.2d(loc=  data.inla[,c('Lon', 'Lat')], max.edge = c(2, 5), cutoff   = 0.001)
+A    <- inla.spde.make.A(mesh, loc = as.matrix(data.inla[,c('Lon', 'Lat')]))
 spde <- inla.spde2.pcmatern(mesh        = mesh, 
                             alpha       = 2, # alpha = 2 corresponds to smoothness = 1 (see Equation 1 in Lindgren at al., 2011, JRSS-B)
                             prior.range = c(25, .5), # P(range < 25) = 0.5
@@ -68,7 +68,7 @@ spde <- inla.spde2.pcmatern(mesh        = mesh,
 
 mesh.index <- inla.spde.make.index(name = "spatial.field", n.spde = spde$n.spde)
 
-## Stack: observations and covariates
+## Data stack: observations and covariates
 effects <- list(c(mesh.index, list(Intercept = 1)),
                 list(area     = data.inla$SU_Area.levels,
                      maxd     = data.inla$SU_Max.Distance,
@@ -118,9 +118,23 @@ stack.pres <- inla.stack(tag     = 'data.stack',
                          A       = list(A, 1),
                          effects = effects)
 
+## Prediction stack
+A.pred          <- inla.spde.make.A(mesh, loc = as.matrix(data.inla[,c('Lon', 'Lat')]))
+stack.size.pred <- inla.stack(tag     = 'pred.stack',
+                              data    = list(y = NA),
+                              A       = list(A.pred, 1),
+                              effects = effects)
+stack.pres.pred <- inla.stack(tag     = 'pred.stack',
+                              data    = list(y = NA),
+                              A       = list(A.pred, 1),
+                              effects = effects)
+
+## Join stack
+join.stack.size <- inla.stack(stack.size, stack.size.pred)
+join.stack.pres <- inla.stack(stack.pres, stack.pres.pred)
+
 ## PC priors and INLA formula
 u.area   <- 5
-u.area   <- sd(data.inla$SU_Area.levels)
 u.maxd   <- 0.5
 u.dist   <- sd(data.inla$Dist2Stream..MEAN.levels)
 u.twim   <- 0.1
@@ -177,10 +191,10 @@ control.compute   <- list(cpo=TRUE, dic=TRUE, waic=TRUE, config=TRUE)
 ####################
 sd(data.inla$y.size, na.rm = T)
 fit.size <- inla(formula.sizes, 
-                 data              = inla.stack.data(stack.size), 
+                 data              = inla.stack.data(join.stack.size), 
                  family            = "gaussian",
                  control.family    = list(hyper=list(theta = list(prior="pc.prec", param=c(2, 0.01)))), # P(measurement error sd > sd data) = 0.1
-                 control.predictor = list(A = inla.stack.A(stack.size), compute = TRUE),
+                 control.predictor = list(A = inla.stack.A(join.stack.size), compute = TRUE),
                  control.compute   = control.compute,
                  control.inla      = list(strategy = "simplified.laplace", int.strategy = "eb"),
                  verbose           = F)
@@ -190,10 +204,11 @@ fit.size <- inla(formula.sizes,
 ## Presence model fit ##
 ########################
 fit.pres <- inla(formula.pres, 
-                 data              = inla.stack.data(stack.pres), 
+                 data              = inla.stack.data(join.stack.pres), 
                  family            = "binomial",
-                 control.predictor = list(A = inla.stack.A(stack.pres), compute = TRUE),
+                 control.predictor = list(A = inla.stack.A(join.stack.pres), compute = TRUE),
                  control.compute   = control.compute,
                  control.inla      = list(strategy = "simplified.laplace", int.strategy = "eb"),
                  verbose           = TRUE)
+
 
