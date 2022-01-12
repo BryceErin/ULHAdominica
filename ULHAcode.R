@@ -212,3 +212,39 @@ fit.pres <- inla(formula.pres,
                  verbose           = TRUE)
 
 
+
+#########################
+### Extra Information ###
+#########################
+## Covariate inclusion ##
+#########################
+## Example for size fit, run model with area as fixed (need to change in data stack 'effects' to just the scaled version and not the grouped;
+## i.e. effects <- list(c(mesh.index, list(Intercept = 1)),
+##                 list(area         = data.inla$SU_Area,...)))
+## and then as random (change back to 'data.inla$SU.Area.levels'), compare WAIC and DIC parameters and keep SU_Area as fixed or random based on this.
+## Continue adding covariates in this fashion, to determine linear/non-linear, if any, influence
+
+y                 <- data.inla$y.size
+
+control.predictor <- list(A = inla.stack.A(join.stack.pres), compute = TRUE)        
+
+formula1          <- y ~ -1 + Intercept + area + f(spatial.field, model = spde)
+fit1              <- inla(formula1, 
+                          family            ="gaussian",
+                          data              = data.inla,
+                          control.predictor = control.predictor,
+                          control.compute   = control.compute,
+                          verbose           = T)                
+fit1$dic$dic
+fit1$waic$waic
+
+formula1.2        <- y ~ -1 + Intercept +  f(area, model = "rw1", hyper = hyper.area, cyclic = cyclic) + f(spatial.field, model = spde)
+fit1.2            <- inla(formula1.2,
+                          family            = "gaussian",
+                          data              =  inla.stack.data(join.stack.size),
+                          control.predictor = control.predictor,
+                          control.compute   = control.compute,
+                          verbose           = T)
+
+fit1.2$dic$dic
+fit1.2$waic$waic
