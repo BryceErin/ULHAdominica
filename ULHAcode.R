@@ -213,38 +213,49 @@ fit.pres <- inla(formula.pres,
 
 
 
-#########################
-### Extra Information ###
-#########################
-## Covariate inclusion ##
-#########################
-## Example for size fit, run model with area as fixed (need to change in data stack 'effects' to just the scaled version and not the grouped;
-## i.e. effects <- list(c(mesh.index, list(Intercept = 1)),
-##                 list(area         = data.inla$SU_Area,...)))
-## and then as random (change back to 'data.inla$SU.Area.levels'), compare WAIC and DIC parameters and keep SU_Area as fixed or random based on this.
-## Continue adding covariates in this fashion, to determine linear/non-linear, if any, influence
+################################################################################
+### Additional Information: example on how to include/exclude each covariate ###
+################################################################################
+## The process to include or exclude covariates and the form in which the covariates are introduced is based on the WAIC and DIC indices and graphical techniques, 
+## following a stepwise forward selection. This means, we begin with an intercept-only model M0 and add in variables one by one. 
+## So, for instance, using the Gaussian size model, to decide on  data.inla$SU_Area, we fit two models, one that includes data.inla$SU_Area as linear effect (M1)
+## an another one that includes it as non-linear effect (M2). We then compare the three models (M0, M1, M2) in terms of WAIC/DIC, PIT and fitted versus observed plots. 
+## Once a model Msel in {M0, M1, M2} is selected, we set M0 = Msel and move to the next covariate, repeating the process.
 
-y                 <- data.inla$y.size
+## Code example using  the Gaussian size model, to decide on  data.inla$SU_Area
 
-control.predictor <- list(A = inla.stack.A(join.stack.pres), compute = TRUE)        
+formula0          <- y ~ -1 + Intercept
+fit0              <- inla(formula0, 
+                          family            ="gaussian",
+                          data              = data.inla,
+                          control.predictor = control.predictor,
+                          control.compute   = control.compute,
+                          verbose           = F)
 
-formula1          <- y ~ -1 + Intercept + area + f(spatial.field, model = spde)
+formula1          <- y ~ -1 + Intercept + SU_Area + f(spatial.field, model = spde)
 fit1              <- inla(formula1, 
                           family            ="gaussian",
                           data              = data.inla,
                           control.predictor = control.predictor,
                           control.compute   = control.compute,
-                          verbose           = T)                
-fit1$dic$dic
-fit1$waic$waic
+                          verbose           = F)
 
-formula1.2        <- y ~ -1 + Intercept +  f(area, model = "rw1", hyper = hyper.area, cyclic = cyclic) + f(spatial.field, model = spde)
-fit1.2            <- inla(formula1.2,
+formula2        <- y ~ -1 + Intercept +  f(SU.Area.levels, model = "rw1", hyper = hyper.area, cyclic = cyclic) + f(spatial.field, model = spde)
+fit2            <- inla(formula2,
                           family            = "gaussian",
                           data              =  inla.stack.data(join.stack.size),
                           control.predictor = control.predictor,
                           control.compute   = control.compute,
-                          verbose           = T)
+                          verbose           = F)
+# Compare WAIC/DIC
+which.min(fit0$dic$dic, fit1$dic$dic, fit2$dic$dic)
+which.min(fit2$waic$waic, fit2$waic$waic, fit2$waic$waic)
 
-fit1.2$dic$dic
-fit1.2$waic$waic
+# Visually compare PITs and observed versus fitted
+hist(fit0$cpo$pit)
+hist(fit1$cpo$pit)
+hist(fit2$cpo$pit)
+
+plot(y, fit0$summary.fitted.values$mean)
+plot(y, fit1$summary.fitted.values$mean)
+plot(y, fit2$summary.fitted.values$mean)
