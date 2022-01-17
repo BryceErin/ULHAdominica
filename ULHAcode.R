@@ -219,7 +219,7 @@ fit.pres <- inla(formula.pres,
 ## The process to include or exclude covariates and the form in which the covariates are introduced is based on the WAIC and DIC indices and graphical techniques, 
 ## following a stepwise forward selection. This means, we begin with an intercept-only model M0 and add in variables one by one. 
 ## So, for instance, using the Gaussian size model, to decide on  data.inla$SU_Area, we fit two models, one that includes data.inla$SU_Area as linear effect (M1)
-## an another one that includes it as non-linear effect (M2). We then compare the three models (M0, M1, M2) in terms of WAIC/DIC, PIT and fitted versus observed plots. 
+## and another one that includes it as non-linear effect (M2). We then compare the three models (M0, M1, M2) in terms of WAIC/DIC, PIT and fitted versus observed plots. 
 ## Once a model Msel in {M0, M1, M2} is selected, we set M0 = Msel and move to the next covariate, repeating the process.
 
 ## Code example using  the Gaussian size model, to decide on  data.inla$SU_Area
