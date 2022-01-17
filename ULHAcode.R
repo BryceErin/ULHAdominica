@@ -193,7 +193,7 @@ sd(data.inla$y.size, na.rm = T)
 fit.size <- inla(formula.sizes, 
                  data              = inla.stack.data(join.stack.size), 
                  family            = "gaussian",
-                 control.family    = list(hyper=list(theta = list(prior="pc.prec", param=c(2, 0.01)))), # P(measurement error sd > sd data) = 0.1
+                 control.family    = list(hyper=list(theta = list(prior="pc.prec", param=c(2, 0.01)))), # P(measurement error sd > sd data) = 0.01
                  control.predictor = list(A = inla.stack.A(join.stack.size), compute = TRUE),
                  control.compute   = control.compute,
                  control.inla      = list(strategy = "simplified.laplace", int.strategy = "eb"),
