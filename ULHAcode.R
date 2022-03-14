@@ -136,19 +136,14 @@ join.stack.pres <- inla.stack(stack.pres, stack.pres.pred)
 ## PC priors and INLA formula
 u.area        <- 5
 u.maxd        <- 0.5
-u.dist        <- sd(data.inla$Dist2Stream..MEAN.levels)
-u.dist.pres   <- 0.5
 u.dist.size   <- sd(data.inla$y.size, na.rm=TRUE)
 u.twim        <- 0.1
-u.slopem      <- sd(data.inla$Slope..MEAN.levels)
 u.slopem.pres <- 0.5
 u.slopem.size <- sd(data.inla$y.size, na.rm=TRUE)
-u.elevm       <- sd(data.inla$Elevation..MEAN.levels)
 u.elevm.pres  <- 0.5
 u.elevm.size  <- sd(data.inla$y.size, na.rm=TRUE)
-u.profm       <- sd(data.inla$ProfileCurvature..MEAN.levels)
 u.profm.pres  <- 0.5
-u.profm.size  <- sd(data.inla$y.size, na.rm=TRUE)
+
 
 alpha.area   <- 0.01
 alpha.maxd   <- 0.01
@@ -160,21 +155,16 @@ alpha.profm  <- 0.01
 
 hyper.area        <- list(theta = list(prior = "pc.prec", param = c(u.area, alpha.area))) 
 hyper.maxd        <- list(theta = list(prior = "pc.prec", param = c(u.maxd, alpha.maxd)))
-hyper.dist        <- list(theta = list(prior = "pc.prec", param = c(u.dist, alpha.dist)))
-hyper.dist.pres   <- list(theta = list(prior = "pc.prec", param = c(u.dist.pres, alpha.dist)))
 hyper.dist.size   <- list(theta = list(prior = "pc.prec", param = c(u.dist.size, alpha.dist)))
 hyper.twim        <- list(theta = list(prior = "pc.prec", param = c(u.twim, alpha.twim)))
-hyper.slopem      <- list(theta = list(prior = "pc.prec", param = c(u.slopem, alpha.slopem)))
 hyper.slopem.pres <- list(theta = list(prior = "pc.prec", param = c(u.slopem.pres, alpha.slopem)))
 hyper.slopem.size <- list(theta = list(prior = "pc.prec", param = c(u.slopem.size, alpha.slopem)))
-hyper.elevm       <- list(theta = list(prior = "pc.prec", param = c(u.elevm, alpha.elevm)))
 hyper.elevm.pres  <- list(theta = list(prior = "pc.prec", param = c(u.elevm.pres, alpha.elevm)))
 hyper.elevm.size  <- list(theta = list(prior = "pc.prec", param = c(u.elevm.size, alpha.elevm)))
-hyper.profm       <- list(theta = list(prior = "pc.prec", param = c(u.profm, alpha.profm)))
 hyper.profm.pres  <- list(theta = list(prior = "pc.prec", param = c(u.profm.pres, alpha.profm)))
-hyper.profm.size  <- list(theta = list(prior = "pc.prec", param = c(u.profm.size, alpha.profm)))
 
-cyclic = TRUE
+
+cyclic = FALSE
 
 formula.sizes = y ~ -1 + Intercept + 
   d.a + d.sqrt.a + distsd + eastm + eastsd + northm + northsd + 
@@ -183,8 +173,8 @@ formula.sizes = y ~ -1 + Intercept +
   f(area, model = "rw1", hyper = hyper.area, cyclic = cyclic) + 
   f(maxd.l, model = "rw1", hyper = hyper.maxd, cyclic = cyclic) + 
   f(dist.l, model = "rw1", hyper = hyper.dist.size, cyclic = cyclic) + 
-  f(elevm, model = "rw2", hyper = hyper.elevm.size, cyclic = cyclic) +
-  f(slopem, model = "rw2",hyper = hyper.slopem.size, cyclic = cyclic) +
+  f(elevm, model = "rw1", hyper = hyper.elevm.size, cyclic = cyclic) +
+  f(slopem, model = "rw1",hyper = hyper.slopem.size, cyclic = cyclic) +
   f(twim.l, model = "rw1", hyper = hyper.twim, cyclic = cyclic) +
   f(spatial.field, model = spde)
 
@@ -193,8 +183,8 @@ formula.pres = y ~ -1 + Intercept +
   elevsd + planm + plansd + profsd + rspm + rspsd + slopesd + 
   twim + twisd + RGA + YPC + YPV + YPI + BAY + IGO + IPL + IGY + OPL + PBA + PPD + 
   f(area, model = "rw1", hyper = hyper.area, cyclic = cyclic) +
-  f(elevm, model = "rw2", hyper = hyper.elevm.pres, cyclic = cyclic) +
-  f(slopem, model = "rw2", hyper = hyper.slopem.pres, cyclic = cyclic) +
+  f(elevm, model = "rw1", hyper = hyper.elevm.pres, cyclic = cyclic) +
+  f(slopem, model = "rw1", hyper = hyper.slopem.pres, cyclic = cyclic) +
   f(profm.l, model = "rw1", hyper = hyper.profm.pres, cyclic = cyclic) +
   f(spatial.field, model = spde)
 
